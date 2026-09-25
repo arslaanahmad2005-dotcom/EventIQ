@@ -4,16 +4,8 @@ import {
   Sparkles, 
   ArrowRight, 
   Compass, 
-  Brain, 
-  ShieldCheck, 
-  Terminal, 
   Code, 
-  Cloud, 
-  Rocket, 
-  CheckCircle2, 
-  Flame, 
-  Users, 
-  Calendar 
+  Flame 
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CATEGORIES } from '../data/events';

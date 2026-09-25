@@ -26,23 +26,28 @@ export default function Profile() {
     showToast 
   } = useApp();
 
-  const navigate = useNavigate();
-
-  // Local editable form state
-  const [formData, setFormData] = useState({ ...userProfile });
+  // Local editable form state with safe array defaults
+  const [formData, setFormData] = useState(() => ({
+    name: userProfile?.name || 'Alex Chen',
+    role: userProfile?.role || 'Fullstack & AI Engineer',
+    bio: userProfile?.bio || '',
+    avatar: userProfile?.avatar || '',
+    location: userProfile?.location || 'San Francisco, CA',
+    experienceLevel: userProfile?.experienceLevel || 'Intermediate',
+    interests: Array.isArray(userProfile?.interests) ? [...userProfile.interests] : ['AI/ML', 'Web Development'],
+    skills: Array.isArray(userProfile?.skills) ? [...userProfile.skills] : ['Python', 'React', 'Docker'],
+    preferredEventTypes: Array.isArray(userProfile?.preferredEventTypes) ? [...userProfile.preferredEventTypes] : ['Hackathon', 'Conference'],
+    preferredMode: userProfile?.preferredMode || 'Both'
+  }));
   const [newSkill, setNewSkill] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Toggle interest
   const handleToggleInterest = (categoryName) => {
     setFormData(prev => {
-      const exists = prev.interests.includes(categoryName);
-      let updated;
-      if (exists) {
-        updated = prev.interests.filter(i => i !== categoryName);
-      } else {
-        updated = [...prev.interests, categoryName];
-      }
+      const interests = prev.interests || [];
+      const exists = interests.includes(categoryName);
+      const updated = exists ? interests.filter(i => i !== categoryName) : [...interests, categoryName];
       return { ...prev, interests: updated };
     });
   };
@@ -52,12 +57,13 @@ export default function Profile() {
     e.preventDefault();
     if (!newSkill.trim()) return;
     const clean = newSkill.trim();
-    if (!formData.skills.includes(clean)) {
-      setFormData(prev => ({
-        ...prev,
-        skills: [...prev.skills, clean]
-      }));
-    }
+    setFormData(prev => {
+      const skills = prev.skills || [];
+      if (!skills.includes(clean)) {
+        return { ...prev, skills: [...skills, clean] };
+      }
+      return prev;
+    });
     setNewSkill('');
   };
 
@@ -65,20 +71,16 @@ export default function Profile() {
   const handleRemoveSkill = (skillToRemove) => {
     setFormData(prev => ({
       ...prev,
-      skills: prev.skills.filter(s => s !== skillToRemove)
+      skills: (prev.skills || []).filter(s => s !== skillToRemove)
     }));
   };
 
   // Toggle preferred event type
   const handleToggleType = (type) => {
     setFormData(prev => {
-      const exists = prev.preferredEventTypes.includes(type);
-      let updated;
-      if (exists) {
-        updated = prev.preferredEventTypes.filter(t => t !== type);
-      } else {
-        updated = [...prev.preferredEventTypes, type];
-      }
+      const types = prev.preferredEventTypes || [];
+      const exists = types.includes(type);
+      const updated = exists ? types.filter(t => t !== type) : [...types, type];
       return { ...prev, preferredEventTypes: updated };
     });
   };
@@ -94,6 +96,10 @@ export default function Profile() {
     setSaving(false);
     showToast('Profile updated & recommendations refreshed!', 'success');
   };
+
+  const currentInterests = formData.interests || [];
+  const currentSkills = formData.skills || [];
+  const currentTypes = formData.preferredEventTypes || [];
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
@@ -116,11 +122,11 @@ export default function Profile() {
         <div className="flex items-center space-x-3 text-xs font-mono">
           <span className="px-3 py-1.5 rounded-lg bg-dark-900 border border-white/10 text-slate-300 flex items-center space-x-1.5">
             <Bookmark className="w-3.5 h-3.5 text-electric-400" />
-            <span>{savedEvents.length} Saved</span>
+            <span>{(savedEvents || []).length} Saved</span>
           </span>
           <span className="px-3 py-1.5 rounded-lg bg-dark-900 border border-white/10 text-slate-300 flex items-center space-x-1.5">
             <Eye className="w-3.5 h-3.5 text-slate-400" />
-            <span>{viewedEvents.length} Viewed</span>
+            <span>{(viewedEvents || []).length} Viewed</span>
           </span>
         </div>
       </div>
@@ -141,7 +147,7 @@ export default function Profile() {
               </label>
               <input
                 type="text"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-dark-950 border border-white/10 text-white text-xs focus:outline-none focus:border-electric-500"
               />
@@ -153,7 +159,7 @@ export default function Profile() {
               </label>
               <input
                 type="text"
-                value={formData.role}
+                value={formData.role || ''}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-dark-950 border border-white/10 text-white text-xs focus:outline-none focus:border-electric-500"
               />
@@ -165,7 +171,7 @@ export default function Profile() {
               </label>
               <textarea
                 rows={2}
-                value={formData.bio}
+                value={formData.bio || ''}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-dark-950 border border-white/10 text-white text-xs focus:outline-none focus:border-electric-500 resize-none"
               />
@@ -179,7 +185,7 @@ export default function Profile() {
                 <MapPin className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  value={formData.location}
+                  value={formData.location || ''}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="e.g. San Francisco, CA or London"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-dark-950 border border-white/10 text-white text-xs focus:outline-none focus:border-electric-500"
@@ -192,7 +198,7 @@ export default function Profile() {
                 Experience Tier
               </label>
               <select
-                value={formData.experienceLevel}
+                value={formData.experienceLevel || 'Intermediate'}
                 onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-dark-950 border border-white/10 text-white text-xs focus:outline-none focus:border-electric-500 cursor-pointer"
               >
@@ -212,13 +218,13 @@ export default function Profile() {
               <span>Areas of Interest (30% Weight)</span>
             </h2>
             <span className="text-[11px] font-mono text-slate-400">
-              {formData.interests.length} selected
+              {currentInterests.length} selected
             </span>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map(category => {
-              const selected = formData.interests.includes(category.name);
+              const selected = currentInterests.includes(category.name);
               return (
                 <button
                   type="button"
@@ -246,13 +252,13 @@ export default function Profile() {
               <span>Skills & Technologies (25% Weight)</span>
             </h2>
             <span className="text-[11px] font-mono text-slate-400">
-              {formData.skills.length} skills listed
+              {currentSkills.length} skills listed
             </span>
           </div>
 
           {/* Current Skills Chips */}
           <div className="flex flex-wrap gap-2 min-h-[38px] p-3 rounded-xl bg-dark-950 border border-white/10">
-            {formData.skills.map(skill => (
+            {currentSkills.map(skill => (
               <span
                 key={skill}
                 className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-electric-500/10 text-electric-300 border border-electric-500/30 text-xs font-mono"
@@ -291,11 +297,11 @@ export default function Profile() {
           {/* Quick Suggestions */}
           <div className="text-[11px] text-slate-400 flex items-center space-x-2 overflow-x-auto pb-1">
             <span className="text-slate-500 font-mono">Suggestions:</span>
-            {POPULAR_SKILLS.filter(s => !formData.skills.includes(s)).slice(0, 7).map(s => (
+            {POPULAR_SKILLS.filter(s => !currentSkills.includes(s)).slice(0, 7).map(s => (
               <button
                 type="button"
                 key={s}
-                onClick={() => setFormData(prev => ({ ...prev, skills: [...prev.skills, s] }))}
+                onClick={() => setFormData(prev => ({ ...prev, skills: [...(prev.skills || []), s] }))}
                 className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 font-mono whitespace-nowrap"
               >
                 + {s}
@@ -317,7 +323,7 @@ export default function Profile() {
               </label>
               <div className="flex flex-wrap gap-2">
                 {EVENT_TYPES.map(type => {
-                  const selected = formData.preferredEventTypes.includes(type);
+                  const selected = currentTypes.includes(type);
                   return (
                     <button
                       type="button"

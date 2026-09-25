@@ -4,8 +4,6 @@ import {
   Sparkles, 
   RotateCw, 
   Sliders, 
-  Info, 
-  CheckCircle2, 
   BrainCircuit, 
   Eye, 
   Bookmark, 
@@ -13,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import AIRecommendationCard from '../components/AIRecommendationCard';
-import AILoadingState from '../components/AILoadingState';
 import EmptyState from '../components/EmptyState';
 
 export default function Recommendations() {
