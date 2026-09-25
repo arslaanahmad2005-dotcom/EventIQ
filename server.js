@@ -724,7 +724,11 @@ app.use((err, req, res, _next) => {
   });
 });
 
-// Start listener
-app.listen(PORT, () => {
-  console.info(`[EventIQ Production Server] Listening on port ${PORT} (Environment: ${NODE_ENV}, Debug: ${DEBUG ? 'ON' : 'OFF'})`);
-});
+// Start listener only in non-serverless mode
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.info(`[EventIQ Production Server] Listening on port ${PORT} (Environment: ${NODE_ENV}, Debug: ${DEBUG ? 'ON' : 'OFF'})`);
+  });
+}
+
+export default app;
