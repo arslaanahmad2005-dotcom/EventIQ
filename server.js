@@ -190,7 +190,11 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. curl, same-origin SPA navigation)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      // Allow configured origins or any vercel.app production/preview deployment
+      if (
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)
+      ) {
         return callback(null, true);
       }
       const corsError = new Error('Cross-Origin Request Blocked by Security Policy.');
